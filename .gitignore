@@ -1,0 +1,7 @@
+__pycache__
+venv
+.pytest_cache
+.vscode
+
+proxies.txt
+test_proxy.txt
