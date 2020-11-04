@@ -53,5 +53,3 @@ class Monitor:
 
     def run(self):
         pass
-        tasks = []
-        
