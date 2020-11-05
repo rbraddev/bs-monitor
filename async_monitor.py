@@ -22,7 +22,6 @@ class AsyncMonitor:
                     self.tasks.append(task)
                     await self.q.put(task)
             await asyncio.sleep(5)
-        
 
     async def _worker(self, name: int):
         while True:
@@ -41,13 +40,14 @@ class AsyncMonitor:
         await asyncio.gather(tasks)
         await self.q.join()
 
-        # for w in 
-    
+        # for w in
+
     def run(self):
         try:
             asyncio.run(self._start_tasks())
         except KeyboardInterrupt:
             print("Monitor exited")
+
 
 am = AsyncMonitor()
 am.run()

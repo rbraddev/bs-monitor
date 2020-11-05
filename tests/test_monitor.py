@@ -1,5 +1,3 @@
-import pytest
-
 from monitor.monitor import Monitor
 from monitor.proxy import Proxy
 
