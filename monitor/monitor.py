@@ -45,7 +45,7 @@ class Monitor:
                 try:
                     monitors: dict = yaml.safe_load(f)
                 except ScannerError:
-                    print("There is an error in the monitor file, please check teh format")
+                    print("There is an error in the monitor file, please check the format")
                     sys.exit
         except FileNotFoundError:
             print("Monitor file not found, this file is required")
@@ -56,7 +56,7 @@ class Monitor:
         for site, data in monitors.items():
             print(f"{site}:")
             for item in data["items"]:
-                print(f"  - {item}")
+                print(f"  - {item['title']}")
 
     async def _update_monitor_list(self):
         while True:
@@ -69,12 +69,13 @@ class Monitor:
                             {
                                 "site": monitor,
                                 "webhook": data["webhook"],
-                                "item": item,
-                                "delay": data.get("delay"),
+                                "title": item["title"],
+                                "item": f"{data['base_url']}{item['url']}",
+                                "delay": data.get("delay", 1),
                             }
                         )
 
-                print(monitors)
+                # print(monitors)
                 orig_monitor_items, self.monitor_items = self.monitor_items, new_monitor_items
                 for monitor in self.monitor_items:
                     if monitor not in orig_monitor_items:
@@ -84,13 +85,14 @@ class Monitor:
                                 monitor_obj(
                                     site=monitor["site"],
                                     webhook=monitor["webhook"],
+                                    title=monitor["title"],
                                     item=monitor["item"],
                                     delay=monitor["delay"],
-                                    proxy=self.proxies[randrange(len(self.proxies))],
+                                    proxy=self.proxies[randrange(len(self.proxies))] if self.proxies else None,
                                 )
                             )
                             await asyncio.sleep(1)
-            await asyncio.sleep(10)
+            await asyncio.sleep(15)
 
     async def _get_monitors(self) -> Union[dict, None]:
         try:
@@ -108,11 +110,13 @@ class Monitor:
     async def _worker(self):
         while True:
             monitor = await self.q.get()
-            await monitor.print_test()
+            await monitor.monitor()
             self.q.task_done()
-            await asyncio.sleep(monitor.delay or 1)
+            await asyncio.sleep(monitor.delay or 10)
             if monitor.__dict__() in self.monitor_items:
                 await self.q.put(monitor)
+            else:
+                await monitor.client.aclose()
 
     async def _start_tasks(self):
         self.q = asyncio.Queue()
