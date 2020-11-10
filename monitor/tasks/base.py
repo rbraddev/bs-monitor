@@ -2,40 +2,24 @@ import json
 
 import httpx
 
-from monitor.proxy import Proxy
-
 
 class Task:
-    def __init__(self, site, webhook: str, title: str, item: str, delay: int = 1, proxy: Proxy = None):
+    def __init__(self, site, webhook: str, release_link: str, delay: int = 1):
         if self.site not in site:
             raise ValueError(f"{site} is invalid for this task")
 
         self.webhook: str = webhook
-        self.title: str = title
-        self.item: str = item
+        self.release_link: str = release_link
         self.delay: int = delay
-        self.proxy: Proxy = proxy
-        self.stock: dict = {}
         self.client: httpx.AsyncClient = None
+        self.etag: str = None
 
     async def monitor(self):
         if self.client is None:
-            proxies = None
-            if self.proxy:
-                proxies = {
-                    "all://": f"http://{self.proxy.username}:{self.proxy.password}@{self.proxy.ip}:{self.proxy.port}"
-                }
-            self.client = httpx.AsyncClient(proxies=proxies)
+            self.client = httpx.AsyncClient()
 
-        print(f"ITEM: {self.item}")
-        try:
-            response = await self.client.get(url=self.item)
-            if response.status_code == 200:
-                await self.check_product(response.text)
-            else:
-                print(f"Monitor: {self.item}, Status code: {response.status_code}")
-        except httpx.ConnectError:
-            print(f"Connection error for monitor: {self.item}")
+        if self.release_link:
+            await self.check_releases()
 
     async def _send_webhook(self, data):
         headers = {"content-type": "application/json"}
@@ -53,14 +37,10 @@ class Task:
         async with httpx.AsyncClient() as client:
             await client.post(url=self.webhook, data=json.dumps(payload), headers=headers)
 
-    async def print_test(self):
-        print(f"{self.site} - {self.item} - {self.proxy.ip}")
-
     def __dict__(self):
         return {
             "site": self.site,
             "webhook": self.webhook,
-            "title": self.title,
-            "item": self.item,
+            "release_link": self.release_link,
             "delay": self.delay,
         }

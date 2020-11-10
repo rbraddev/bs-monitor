@@ -1,43 +1,24 @@
 import asyncio
 import sys
-from random import randrange
-from typing import List, Union
+from typing import Union
 
 import aiofiles
 import yaml
 from yaml.scanner import ScannerError
 
 import monitor.tasks as tasks
-from monitor.proxy import Proxy
 
-available_sites = {"snipes": tasks.Snipes, "asos": tasks.Asos}
+available_sites = {"graffitishop": tasks.GraffitiShop}
 
 
 class Monitor:
     def __init__(self, proxy_file: str = "proxies.txt", monitors_file: str = "monitors.yml", max_workers: int = 10):
-        self.proxies: List[Proxy] = []
         self.q: asyncio.Queue = None
         self.monitor_file: str = ""
         self.monitor_items: list = []
         self.max_workers: int = max_workers
 
-        self._initiate_proxies(proxy_file)
         self._validate_monitor_file(monitors_file)
-
-    def _initiate_proxies(self, proxy_file: str) -> None:
-        try:
-            with open(proxy_file, "r") as f:
-                proxies_loaded = 0
-                for line in f.readlines():
-                    ip, port, username, password = line.split(":")
-                    try:
-                        self.proxies.append(Proxy(ip, port, username, password))
-                        proxies_loaded += 1
-                    except ValueError:
-                        print(f"Unable to load proxy: {line}")
-            print(f"{proxies_loaded} proxies have been loaded")
-        except FileNotFoundError:
-            print("Proxies files not found, continuing with localhost")
 
     def _validate_monitor_file(self, monitor_file: str) -> None:
         try:
@@ -54,9 +35,8 @@ class Monitor:
         self.monitor_file = monitor_file
         print("The following will be monitored:")
         for site, data in monitors.items():
-            print(f"{site}:")
-            for item in data["items"]:
-                print(f"  - {item['title']}")
+            if data.get("release_link"):
+                print(f"{site.capitalize()} Releases")
 
     async def _update_monitor_list(self):
         while True:
@@ -69,8 +49,7 @@ class Monitor:
                             {
                                 "site": monitor,
                                 "webhook": data["webhook"],
-                                "title": item["title"],
-                                "item": f"{data['base_url']}{item['url']}",
+                                "release_link": data.get("release_link"),
                                 "delay": data.get("delay", 1),
                             }
                         )
@@ -85,10 +64,8 @@ class Monitor:
                                 monitor_obj(
                                     site=monitor["site"],
                                     webhook=monitor["webhook"],
-                                    title=monitor["title"],
-                                    item=monitor["item"],
+                                    release_link=monitor["release_link"],
                                     delay=monitor["delay"],
-                                    proxy=self.proxies[randrange(len(self.proxies))] if self.proxies else None,
                                 )
                             )
                             await asyncio.sleep(1)
