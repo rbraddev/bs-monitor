@@ -26,7 +26,7 @@ class Graffitishop(Task):
             if results.status_code == 304:
                 print(f"{self.site}: {self.release_link} - NO UPDATES")
 
-        except httpx.ConnectError:
+        except (httpx.ConnectError, httpx.ConnectTimeout):
             print(f"{self.site.capitalize()} Monitor: Error connecting to {self.release_link}")
 
     async def _get_updates(self, data: list):
@@ -35,7 +35,6 @@ class Graffitishop(Task):
 
         for key, data in self.items.items():
             original_item = original_items.get(key)
-            print(original_item)
             if not original_item and data["url"] != "":
                 await self._send_webhook(item=key, url=data["url"], img=data["img"])
 
