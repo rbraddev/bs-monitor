@@ -1,5 +1,5 @@
 ---
 graffitishop:
-  release_link: https://release.link.com/graffitishop
-  webhook: https://discord.com/api/webhooks/id/token
+  release_link: https://campo-tools.herokuapp.com/graffitishop?releases=true&json=true
+  webhook: https://discord.com/api/webhooks/774046115510616094/pU-0bjueNrwxeVbFyrz5O7v81soBBouASC41f5V27V9AZlT6NckUmqOl_opqtSMItlRn
   delay: 5
