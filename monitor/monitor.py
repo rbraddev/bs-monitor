@@ -8,11 +8,11 @@ from yaml.scanner import ScannerError
 
 import monitor.tasks as tasks
 
-available_sites = {"graffitishop": tasks.GraffitiShop}
+available_sites = {"graffitishop": tasks.Graffitishop}
 
 
 class Monitor:
-    def __init__(self, proxy_file: str = "proxies.txt", monitors_file: str = "monitors.yml", max_workers: int = 10):
+    def __init__(self, proxy_file: str = "proxies.txt", monitors_file: str = "monitors.yml", max_workers: int = 1):
         self.q: asyncio.Queue = None
         self.monitor_file: str = ""
         self.monitor_items: list = []
@@ -44,15 +44,14 @@ class Monitor:
             if monitors is not None:
                 new_monitor_items = []
                 for monitor, data in monitors.items():
-                    for item in data["items"]:
-                        new_monitor_items.append(
-                            {
-                                "site": monitor,
-                                "webhook": data["webhook"],
-                                "release_link": data.get("release_link"),
-                                "delay": data.get("delay", 1),
-                            }
-                        )
+                    new_monitor_items.append(
+                        {
+                            "site": monitor,
+                            "webhook": data["webhook"],
+                            "release_link": data.get("release_link"),
+                            "delay": data.get("delay", 1),
+                        }
+                    )
 
                 # print(monitors)
                 orig_monitor_items, self.monitor_items = self.monitor_items, new_monitor_items

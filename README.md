@@ -2,13 +2,13 @@
 
 Files required:
 
-    * proxies.txt - format: ip:username:password
-    * monitors.yml
+monitors.yml:
 
-Files for testing:
-
-    * test_proxy.txt - just include one working proxy, same format as proxies.txt
-
+    ---
+    graffiti:
+      release_link: https://graffitilink.release.link.com/
+      webhook: https://discord.com/api/webhooks/webhook_data
+      delay: 5
 
 Basic usage:
 
