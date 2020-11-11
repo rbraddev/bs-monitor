@@ -2,4 +2,8 @@
 graffitishop:
   release_link: https://release.link.com/graffitishop
   webhook: https://discord.com/api/webhooks/id/token
+<<<<<<< HEAD
   delay: 5
+=======
+  delay: 5
+>>>>>>> 1a5c1311b5f6496a73b1caad5cdbd08dd6bb5214
