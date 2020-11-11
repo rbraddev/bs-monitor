@@ -1,0 +1,5 @@
+---
+graffitishop:
+  release_link: https://release.link.com/graffitishop
+  webhook: https://discord.com/api/webhooks/id/token
+  delay: 5
