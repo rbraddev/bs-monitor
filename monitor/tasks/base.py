@@ -2,65 +2,49 @@ import json
 
 import httpx
 
-from monitor.proxy import Proxy
-
 
 class Task:
-    def __init__(self, site, webhook: str, title: str, item: str, delay: int = 1, proxy: Proxy = None):
-        if self.site not in site:
+    def __init__(self, site: str, webhook: str, release_link: str, delay: int = 1):
+        if self.site != site:
             raise ValueError(f"{site} is invalid for this task")
 
         self.webhook: str = webhook
-        self.title: str = title
-        self.item: str = item
+        self.release_link: str = release_link
         self.delay: int = delay
-        self.proxy: Proxy = proxy
-        self.stock: dict = {}
         self.client: httpx.AsyncClient = None
+        self.items: dict = {}
+        self.etag: str = None
 
     async def monitor(self):
         if self.client is None:
-            proxies = None
-            if self.proxy:
-                proxies = {
-                    "all://": f"http://{self.proxy.username}:{self.proxy.password}@{self.proxy.ip}:{self.proxy.port}"
-                }
-            self.client = httpx.AsyncClient(proxies=proxies)
+            self.client = httpx.AsyncClient()
+        if self.release_link:
+            await self._check_releases()
 
-        print(f"ITEM: {self.item}")
-        try:
-            response = await self.client.get(url=self.item)
-            if response.status_code == 200:
-                await self.check_product(response.text)
-            else:
-                print(f"Monitor: {self.item}, Status code: {response.status_code}")
-        except httpx.ConnectError:
-            print(f"Connection error for monitor: {self.item}")
-
-    async def _send_webhook(self, data):
+    async def _send_webhook(self, item: str, url: str, img: str):
         headers = {"content-type": "application/json"}
-        nl = "\n"
+        # nl = "\n"
         payload = {
             "content": "In Stock",
             "username": "bs-monitor",
-            "embeds": [
-                {
-                    "title": self.site.capitalize(),
-                    "description": f"[{self.title}]({self.item})\n\nAvailable Sizes:\n{nl.join([k for k, v in self.stock.items() if v])}",
-                }
-            ],
+            "embeds": [{"title": self.site.capitalize(), "description": f"[{item}]({url})", "image": {"url": img}}],
         }
         async with httpx.AsyncClient() as client:
             await client.post(url=self.webhook, data=json.dumps(payload), headers=headers)
 
-    async def print_test(self):
-        print(f"{self.site} - {self.item} - {self.proxy.ip}")
+    async def _check_releases(self):
+        return NotImplemented
+
+    async def _get_updates(self, data: list):
+        return NotImplemented
+
+    def _parse_items(self, data: list) -> dict:
+        pass
 
     def __dict__(self):
         return {
             "site": self.site,
             "webhook": self.webhook,
-            "title": self.title,
-            "item": self.item,
+            "release_link": self.release_link,
             "delay": self.delay,
         }
