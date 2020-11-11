@@ -35,10 +35,11 @@ class Graffitishop(Task):
 
         for key, data in self.items.items():
             original_item = original_items.get(key)
-            if not original_item and data["url"]:
+            print(original_item)
+            if not original_item and data["url"] != "":
                 await self._send_webhook(item=key, url=data["url"], img=data["img"])
 
-            if original_item and original_item["url"] != data["url"] and not data["url"]:
+            if original_item and original_item[key]["url"] != data["url"] and data["url"] != "":
                 await self._send_webhook(item=key, url=data["url"], img=data["img"])
 
     def _parse_items(self, data: list) -> dict:
