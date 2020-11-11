@@ -1,17 +1,5 @@
 ---
-<<<<<<< HEAD
-snipes:
-  base_url: https://www.snipes.com
-  webhook: enter webhook url
-  delay: 10
-  items:
-    - title: Air Jordan 1 Low
-      url: /p/jordan-air_jordan_1_low_-white%2Ftrack_red%2Fdeep_royal_blue-00013801855733.html
-    - title: Max Aura 2
-      url: /p/jordan-max_aura_2_-black%2Fwhite%2Fgym_red-00013801882097.html
-=======
 graffitishop:
   release_link: https://release.link.com/graffitishop
   webhook: https://discord.com/api/webhooks/id/token
   delay: 5
->>>>>>> release_link
