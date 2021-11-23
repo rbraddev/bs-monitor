@@ -134,10 +134,14 @@ class Monitor:
             if result > 0:
                 print(f"{result} proxies removed")
         self.q = asyncio.Queue()
-        tasks = [asyncio.create_task(self._update_monitor_list())]
-        for _ in range(self.max_workers):
-            asyncio.create_task(self._worker())
-        await asyncio.gather(*tasks)
+
+        await asyncio.gather(
+            asyncio.create_task(self._update_monitor_list()),
+            *[
+                asyncio.create_task(self._worker())
+                for _ in range(self.max_workers)
+            ]
+        )
         await self.q.join()
 
     def run(self, validate_proxies: bool = False):
