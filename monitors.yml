@@ -1,10 +1,21 @@
 ---
-snipes:
-  base_url: https://www.snipes.com
-  webhook: enter webhook url
+# snipes:
+#   webhook: enter webhook url
+#   delay: 10
+#   items:
+#     - title: Air Jordan 1 Low
+#       url: p/jordan-air_jordan_1_low_-white%2Ftrack_red%2Fdeep_royal_blue-00013801855733.html
+#     - title: Max Aura 2
+#       url: p/jordan-max_aura_2_-black%2Fwhite%2Fgym_red-00013801882097.html
+johnlewis:
+  webhook: https://discord.com/api/webhooks/895237039182708766/NvpTIsVCvzUAdshFcF_Q73RT6z6T73RpBluyEv8mIKR6WEpxCl_YjncNrVqhEuNqDVwq
   delay: 10
   items:
-    - title: Air Jordan 1 Low
-      url: /p/jordan-air_jordan_1_low_-white%2Ftrack_red%2Fdeep_royal_blue-00013801855733.html
-    - title: Max Aura 2
-      url: /p/jordan-max_aura_2_-black%2Fwhite%2Fgym_red-00013801882097.html
+    - title: Playstation 5 Disc
+      product: "5115192"
+# asda:
+#   webhook: https://discord.com/api/webhooks/895237039182708766/NvpTIsVCvzUAdshFcF_Q73RT6z6T73RpBluyEv8mIKR6WEpxCl_YjncNrVqhEuNqDVwq
+#   delay: 5
+#   items:
+#     - title: Playstation 5 Disc
+#       product: "051003646"

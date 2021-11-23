@@ -39,13 +39,23 @@ class Proxy:
 
     def check_working(self, test_site: str = "https://www.google.com/"):
         proxies = {"all://": f"http://{self.username}:{self.password}@{self.ip}:{self.port}"}
-
         with httpx.Client(proxies=proxies) as client:
             try:
                 start = time.perf_counter()
                 res = client.get(test_site)
                 response_time = round((time.perf_counter() - start) * 1000, 2)
-            except (httpx.ConnectError, httpx.ConnectTimeout):
+            except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ProxyError):
+                return {"working": False, "response_time": None}
+        return {"working": res.status_code == 200, "response_time": response_time}
+
+    async def acheck_working(self, test_site: str = "https://www.google.com/"):
+        proxies = {"all://": f"http://{self.username}:{self.password}@{self.ip}:{self.port}"}
+        async with httpx.AsyncClient(proxies=proxies) as client:
+            try:
+                start = time.perf_counter()
+                res = await client.get(test_site)
+                response_time = round((time.perf_counter() - start) * 1000, 2)
+            except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ProxyError):
                 return {"working": False, "response_time": None}
         return {"working": res.status_code == 200, "response_time": response_time}
 
@@ -74,3 +84,6 @@ class Proxy:
         except ValueError:
             return False
         return True
+
+    def __repr__(self) -> str:
+        return f"<Proxy {self.username}:{self.password}@{self.ip}:{self.port}>"

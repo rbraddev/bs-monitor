@@ -1,7 +1,7 @@
 import asyncio
 import sys
-from random import randrange
 from typing import List, Union
+import random
 
 import aiofiles
 import yaml
@@ -10,7 +10,7 @@ from yaml.scanner import ScannerError
 import monitor.tasks as tasks
 from monitor.proxy import Proxy
 
-available_sites = {"snipes": tasks.Snipes, "asos": tasks.Asos}
+available_sites = {"snipes": tasks.Snipes, "johnlewis": tasks.JohnLewis, "asda": tasks.Asda}
 
 
 class Monitor:
@@ -29,9 +29,9 @@ class Monitor:
             with open(proxy_file, "r") as f:
                 proxies_loaded = 0
                 for line in f.readlines():
-                    ip, port, username, password = line.split(":")
+                    server, port, username, password = line.strip("\n").split(":")
                     try:
-                        self.proxies.append(Proxy(ip, port, username, password))
+                        self.proxies.append(Proxy(server, port, username, password))
                         proxies_loaded += 1
                     except ValueError:
                         print(f"Unable to load proxy: {line}")
@@ -70,7 +70,7 @@ class Monitor:
                                 "site": monitor,
                                 "webhook": data["webhook"],
                                 "title": item["title"],
-                                "item": f"{data['base_url']}{item['url']}",
+                                "product": item["product"],
                                 "delay": data.get("delay", 1),
                             }
                         )
@@ -86,9 +86,9 @@ class Monitor:
                                     site=monitor["site"],
                                     webhook=monitor["webhook"],
                                     title=monitor["title"],
-                                    item=monitor["item"],
+                                    product=monitor["product"],
                                     delay=monitor["delay"],
-                                    proxy=self.proxies[randrange(len(self.proxies))] if self.proxies else None,
+                                    proxies=self.proxies if self.proxies else None,
                                 )
                             )
                             await asyncio.sleep(1)
@@ -112,13 +112,27 @@ class Monitor:
             monitor = await self.q.get()
             await monitor.monitor()
             self.q.task_done()
-            await asyncio.sleep(monitor.delay or 10)
+            await asyncio.sleep(random.randrange(monitor.delay) or random.randrange(10))
             if monitor.__dict__() in self.monitor_items:
                 await self.q.put(monitor)
             else:
                 await monitor.client.aclose()
 
-    async def _start_tasks(self):
+    async def _check_proxies(self):
+        proxies_removed = 0
+        for proxy in self.proxies:
+            result = await proxy.acheck_working()
+            if not result["working"]:
+                self.proxies.remove(proxy)
+                proxies_removed += 1
+        return proxies_removed
+
+    async def _start_tasks(self, validate_proxies: bool = False):
+        if self.proxies and validate_proxies:
+            print("Validating Proxies...")
+            result = await self._check_proxies()
+            if result > 0:
+                print(f"{result} proxies removed")
         self.q = asyncio.Queue()
         tasks = [asyncio.create_task(self._update_monitor_list())]
         for _ in range(self.max_workers):
@@ -126,8 +140,8 @@ class Monitor:
         await asyncio.gather(*tasks)
         await self.q.join()
 
-    def run(self):
+    def run(self, validate_proxies: bool = False):
         try:
-            asyncio.run(self._start_tasks())
+            asyncio.run(self._start_tasks(validate_proxies))
         except KeyboardInterrupt:
             print("Monitor exited")

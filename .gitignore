@@ -5,3 +5,6 @@ venv
 
 proxies.txt
 test_proxy.txt
+proxies-koch.txt
+proxies-rampage.txt
+notes.txt

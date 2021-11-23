@@ -5,12 +5,13 @@ description = "Sneaker monitor"
 authors = ["Ryan Bradshaw <ryan@rbradshaw.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 httpx = "^0.16.1"
 beautifulsoup4 = "^4.9.3"
 PyYAML = "^5.3.1"
 aiofiles = "^0.6.0"
 lxml = "^4.6.1"
+selenium = "^3.141.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"

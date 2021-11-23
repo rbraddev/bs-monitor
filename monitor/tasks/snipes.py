@@ -5,6 +5,7 @@ from monitor.tasks.base import Task
 
 class Snipes(Task):
     site = "snipes"
+    base_url = "https://www.snipes.com/"
 
     async def check_product(self, data):
         soup = BeautifulSoup(data, "lxml")
